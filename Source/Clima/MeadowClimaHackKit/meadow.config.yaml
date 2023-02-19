@@ -16,17 +16,17 @@ Name: MeadowClimaHackKit
 Network:
 
 # Automatically attempt to get the time at startup?
-GetNetworkTimeAtStartup: 1
+GetNetworkTimeAtStartup: 0
 
 # Time synchronization period in seconds.
-NtpRefreshPeriod: 600
+#NtpRefreshPeriod: 600
 
 # Name of the NTP servers.
-NtpServers:
-- time.google.com
-- time1.google.com
-- time2.google.com
-- time3.google.com
+#NtpServers:
+#- time.google.com
+#- time1.google.com
+#- time2.google.com
+#- time3.google.com
 
 # IP addresses of the DNS servers.
 DnsServers:

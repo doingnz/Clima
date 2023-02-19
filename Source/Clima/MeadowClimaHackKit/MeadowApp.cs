@@ -8,15 +8,19 @@ using MeadowClimaHackKit.Connectivity;
 using MeadowClimaHackKit.Controller;
 using System;
 using System.Threading.Tasks;
+using MeadowClimaHackKit.ServiceAccessLayer;
+using System.Net.Http;
 
 namespace MeadowClimaHackKit
 {
     // Change F7FeatherV2 to F7FeatherV1 for V1.x boards
-    public class MeadowApp : App<F7FeatherV1>
+    public class MeadowApp : App<F7FeatherV2>
     {
         bool isWiFi = true;
-
+        private int port = 5417;
         PushButton buttonUp, buttonDown, buttonMenu;
+
+        private static HttpClient Client = new HttpClient();
 
         public override Task Initialize()
         {
@@ -58,11 +62,14 @@ namespace MeadowClimaHackKit
             await wifi.Connect(Secrets.WIFI_NAME, Secrets.WIFI_PASSWORD, TimeSpan.FromSeconds(45));
         }
 
-        private void NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
+        private async void NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
+  		 	Console.WriteLine($"MeadowApp: Connected to network: ip={sender.IpAddress} port={port}");
             DisplayController.Instance.StopWifiConnectingAnimation();
 
-            var mapleServer = new MapleServer(sender.IpAddress, 5417, true, logger: Resolver.Log);
+            await DateTimeService.GetTimeAsync(Client);
+
+            var mapleServer = new MapleServer(sender.IpAddress, port, true, logger: Resolver.Log);
             mapleServer.Start();
 
             TemperatureController.Instance.Initialize();
