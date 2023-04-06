@@ -45,7 +45,7 @@ namespace MeadowClimaHackKit.ServiceAccessLayer
                             dateTimeOffset.Second
                         );
 
-                        MeadowApp.Device.SetClock(dateTime);
+                        MeadowApp.Device.PlatformOS.SetClock(dateTime);
                         Console.WriteLine($"SetClock({dateTime});");
                     }
                     else
