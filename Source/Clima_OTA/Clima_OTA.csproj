@@ -5,6 +5,9 @@
     <OutputType>Library</OutputType>
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>9.0</LangVersion>
+	</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Meadow.AmqpNetLite" Version="0.96.0" />
     <PackageReference Include="Meadow.Logging" Version="1.6.0" />

@@ -15,28 +15,28 @@ $(document).ready(() => {
       this.temperatureData = new Array(this.maxLen);
       this.humidityData = new Array(this.maxLen);
       this.pressureData = new Array(this.maxLen);
-      this.memoryData = new Array(this.maxLen);
-      this.batteryData = new Array(this.maxLen);
-      this.solarData = new Array(this.maxLen);
+      this.totalmemoryData = new Array(this.maxLen);
+      this.batteryvoltageData = new Array(this.maxLen);
+      this.solarvoltageData = new Array(this.maxLen);
     }
 
-    addData(time, temperature, humidity, pressure, memory, battery, solar) {
+    addData(time, temperature, humidity, pressure, totalmemory, batteryvoltage, solarvoltage) {
       this.timeData.push(time);
       this.temperatureData.push(temperature);
       this.humidityData.push(humidity || null);
       this.pressureData.push(pressure);
-      this.memoryData.push(memory);
-      this.batteryData.push(battery);
-      this.solarData.push(solar);
+      this.totalmemoryData.push(totalmemory);
+      this.batteryvoltageData.push(batteryvoltage);
+      this.solarvoltageData.push(solarvoltage);
 
       if (this.timeData.length > this.maxLen) {
         this.timeData.shift();
         this.temperatureData.shift();
         this.humidityData.shift();
         this.pressureData.shift();
-        this.memoryData.shift();
-        this.batteryData.shift();
-        this.solarData.shift();
+        this.totalmemoryData.shift();
+        this.batteryvoltageData.shift();
+        this.solarvoltageData.shift();
         }
     }
   }
@@ -106,7 +106,7 @@ $(document).ready(() => {
       }]
   };
 
-  const chartDataMemory = {
+  const chartDataTotalMemory = {
     datasets: [{
         fill: false,
         label: 'Memory',
@@ -119,7 +119,7 @@ $(document).ready(() => {
         spanGaps: true,
       }]
   };
-  const chartDataBattery = {
+  const chartDataBatteryVoltage = {
     datasets: [{
         fill: false,
         label: 'Battery',
@@ -131,7 +131,7 @@ $(document).ready(() => {
         pointHoverBorderColor: 'rgba(239, 125, 59, 1)',
         spanGaps: true,
       }]
-  };  const chartDataSolar = {
+  };  const chartDataSolarVoltage = {
     datasets: [{
         fill: false,
         label: 'Solar',
@@ -188,7 +188,7 @@ $(document).ready(() => {
     }
   };
 
-  const chartOptionsMemory = {
+  const chartOptionsTotalMemory = {
     scales: {
       yAxes: [{
         id: 'Memory',
@@ -201,7 +201,7 @@ $(document).ready(() => {
       }]
     }
   };
-  const chartOptionsBattery = {
+  const chartOptionsBatteryVoltage = {
     scales: {
       yAxes: [{
         id: 'Battery',
@@ -214,7 +214,7 @@ $(document).ready(() => {
       }]
     }
   };
-  const chartOptionsSolar = {
+  const chartOptionsSolarVoltage = {
     scales: {
       yAxes: [{
         id: 'Solar',
@@ -257,30 +257,30 @@ $(document).ready(() => {
     });
 
   const ctxMemory = document.getElementById('iotMemory').getContext('2d');
-  const lineChartMemory = new Chart(
+  const lineChartTotalMemory = new Chart(
     ctxMemory,
     {
       type: 'line',
-      data: chartDataMemory,
-      options: chartOptionsMemory,
+      data: chartDataTotalMemory,
+      options: chartOptionsTotalMemory,
     });
 
   const ctxBattery = document.getElementById('iotBattery').getContext('2d');
-  const lineChartBattery = new Chart(
+  const lineChartBatteryVoltage = new Chart(
     ctxBattery,
     {
       type: 'line',
-      data: chartDataBattery,
-      options: chartOptionsBattery,
+      data: chartDataBatteryVoltage,
+      options: chartOptionsBatteryVoltage,
     });
 
   const ctxSolar = document.getElementById('iotSolar').getContext('2d');
-  const lineChartSolar = new Chart(
+  const lineChartSolarVoltage = new Chart(
     ctxSolar,
     {
       type: 'line',
-      data: chartDataSolar,
-      options: chartOptionsSolar,
+      data: chartDataSolarVoltage,
+      options: chartOptionsSolarVoltage,
     });
           
 
@@ -298,18 +298,18 @@ $(document).ready(() => {
     chartDataHumidity.datasets[0].data = device.humidityData;
     chartDataPressure.labels = device.timeData;
     chartDataPressure.datasets[0].data = device.pressureData;
-    chartDataMemory.labels = device.timeData;
-    chartDataMemory.datasets[0].data = device.memoryData;
-    chartDataBattery.labels = device.timeData;
-    chartDataBattery.datasets[0].data = device.batteryData;
-    chartDataSolar.labels = device.timeData;
-    chartDataSolar.datasets[0].data = device.solarData;
+    chartDataTotalMemory.labels = device.timeData;
+    chartDataTotalMemory.datasets[0].data = device.totalmemoryData;
+    chartDataBatteryVoltage.labels = device.timeData;
+    chartDataBatteryVoltage.datasets[0].data = device.batteryvoltageData;
+    chartDataSolarVoltage.labels = device.timeData;
+    chartDataSolarVoltage.datasets[0].data = device.solarvoltageData;
     lineChartTemperature.update();
     lineChartHumidity.update();
     lineChartPressure.update();
-    linechartMemory.update();
-    linechartBattery.update();
-    linechartSolar.update();
+    linechartTotalMemory.update();
+    linechartBatteryVoltage.update();
+    linechartSolarVoltage.update();
   }
   listOfDevices.addEventListener('change', OnSelectionChange, false);
 
@@ -330,9 +330,9 @@ $(document).ready(() => {
           !messageData.IotData.temperature && 
           !messageData.IotData.humidity && 
           !messageData.IotData.pressure && 
-          !messageData.IotData.memory && 
-          !messageData.IotData.battery &&
-          !messageData.IotData.solar
+          !messageData.IotData.totalmemory && 
+          !messageData.IotData.batteryvoltage &&
+          !messageData.IotData.solarvoltage
           )) {
         return;
       }
@@ -346,9 +346,9 @@ $(document).ready(() => {
           messageData.IotData.temperature, 
           messageData.IotData.humidity, 
           messageData.IotData.pressure,
-          messageData.IotData.memory,
-          messageData.IotData.battery,
-          messageData.IotData.solar
+          messageData.IotData.totalmemory,
+          messageData.IotData.batteryvoltage,
+          messageData.IotData.solarvoltage
           );
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
@@ -360,9 +360,9 @@ $(document).ready(() => {
           messageData.IotData.temperature, 
           messageData.IotData.humidity, 
           messageData.IotData.pressure,
-          messageData.IotData.memory,
-          messageData.IotData.battery,
-          messageData.IotData.solar);
+          messageData.IotData.totalmemory,
+          messageData.IotData.batteryvoltage,
+          messageData.IotData.solarvoltage);
 
         // add device to the UI list
         const node = document.createElement('option');
@@ -381,9 +381,9 @@ $(document).ready(() => {
       lineChartTemperature.update();
       lineChartHumidity.update();
       lineChartPressure.update();
-      lineChartMemory.update();
-      lineChartBattery.update();
-      lineChartSolar.update();
+      lineChartTotalMemory.update();
+      lineChartBatteryVoltage.update();
+      lineChartSolarVoltage.update();
     } catch (err) {
       console.error(err);
     }

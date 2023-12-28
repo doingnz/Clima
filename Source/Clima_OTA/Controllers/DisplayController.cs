@@ -37,7 +37,7 @@ namespace Clima_OTA.Controllers
         public void UpdateClimaResults(ClimaRecord clima)
         {
             Resolver.Log.Info($"Temperature    : {clima.Temperature.Celsius:0.0}C, Humidity: {clima.Humidity.Percent:0.#}%, Pressure: {clima.Pressure.Millibar:0.#}mbar");
-            Resolver.Log.Info($"Memory         : {clima.Memory}");
+            Resolver.Log.Info($"Memory         : {clima.TotalMemory}");
             Resolver.Log.Info($"Solar Voltage  : {clima.SolarVoltage.Volts:0.#} volts");
             Resolver.Log.Info($"Battery Voltage: {clima.BatteryVoltage.Volts:0.#} volts");
         }

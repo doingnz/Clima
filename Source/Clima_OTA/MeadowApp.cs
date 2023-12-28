@@ -1,14 +1,11 @@
 ﻿using Clima_OTA.Controllers;
+using Clima_OTA.Services;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Foundation;
 using Meadow.Hardware;
 using Meadow.Logging;
-using Meadow.Peripherals.Sensors.Location.Gnss;
-using Meadow.Units;
 using Meadow.Update;
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Clima_OTA
@@ -16,7 +13,6 @@ namespace Clima_OTA
     // Change F7FeatherV2 to F7FeatherV1 for V1.x boards
     public class MeadowApp : App<F7CoreComputeV2>
     {
-        IClimaHardware clima;
         MainController mainController;
 
         //const string udpIP = "192.168.2.194";
@@ -44,7 +40,9 @@ namespace Clima_OTA
             Resolver.Log.Info("Start Wifi Connection to get Connected Event!");
             await wifi.Connect("ASUS_10_2G", "Lunatic16042021!", TimeSpan.FromSeconds(45));
 
-            mainController = new MainController(hardware, wifi);
+            IStorageService storageService = new IoTHubController();
+
+            mainController = new MainController(hardware, wifi, storageService);
 
             await mainController.Initialize();
         }
@@ -66,7 +64,6 @@ namespace Clima_OTA
         private void NtpClient_TimeChanged(DateTime utcTime)
         {
             Resolver.Log.Info($"TimeChanged (UTC): {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
-            clima.ColorLed.SetColor(Color.GreenYellow);
         }
 
         private void Wifi_NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)

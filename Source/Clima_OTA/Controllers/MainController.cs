@@ -1,4 +1,5 @@
 ﻿using Clima_OTA.Model;
+using Clima_OTA.Services;
 using Meadow;
 using Meadow.Foundation;
 using Meadow.Hardware;
@@ -12,17 +13,18 @@ namespace Clima_OTA.Controllers
 {
     internal class MainController
     {
-        int TIMEZONE_OFFSET = +13; // UTC+12 (+1 for DST)
+        readonly int TIMEZONE_OFFSET = +13; // UTC+12 (+1 for DST)
 
-        IMeadowAzureIoTHubHardware hardware;
-        IWiFiNetworkAdapter network;
+        readonly IMeadowAzureIoTHubHardware hardware;
+        readonly IWiFiNetworkAdapter network;
         IDisplayController displayController;
-        IoTHubController iotHubService;
+        readonly IStorageService storageService;
 
-        public MainController(IMeadowAzureIoTHubHardware hardware, IWiFiNetworkAdapter network)
+        public MainController(IMeadowAzureIoTHubHardware hardware, IWiFiNetworkAdapter network, IStorageService storageService)
         {
             this.hardware = hardware;
             this.network = network;
+            this.storageService = storageService;
         }
 
         public async Task Initialize()
@@ -34,7 +36,6 @@ namespace Clima_OTA.Controllers
             Thread.Sleep(3000);
             displayController.ShowDataScreen();
 
-            iotHubService = new IoTHubController();
             await InitializeIoTHub();
 
             hardware.Updated += EnvironmentalSensorUpdated;
@@ -43,11 +44,11 @@ namespace Clima_OTA.Controllers
   
         private async Task InitializeIoTHub()
         {
-            while (!network.IsConnected || !iotHubService.isAuthenticated)
+            while (!network.IsConnected || !storageService.isAuthenticated)
             {
                 displayController.UpdateStatus("Authenticating...");
 
-                bool authenticated = await iotHubService.Initialize();
+                bool authenticated = await storageService.Initialize();
 
                 if (authenticated)
                 {
@@ -60,14 +61,14 @@ namespace Clima_OTA.Controllers
             }
         }
 
-        private async Task SendDataToIoTHub(ClimaRecord data)
+        private async Task SendDataToStorageService(ClimaRecord data)
         {
-            if (network.IsConnected && iotHubService.isAuthenticated)
+            if (network.IsConnected && storageService.isAuthenticated)
             {
                 //displayController.UpdateSyncStatus(true);
                 displayController.UpdateStatus("Sending data...");
 
-                await iotHubService.SendEnvironmentalReading(data);
+                await storageService.SendEnvironmentalReading(data);
 
                 //displayController.UpdateSyncStatus(false);
                 displayController.UpdateStatus("Data sent!");
@@ -78,15 +79,11 @@ namespace Clima_OTA.Controllers
             }
         }
 
-        private void EnvironmentalSensorUpdated(object sender, ClimaRecord e)
-        {
-            throw new NotImplementedException();
-        }
         private async void EnvironmentalSensorUpdated(object sender, Meadow.IChangeResult<ClimaRecord> e)
         {
-            _ = hardware.RgbPwmLed.StartBlink(Color.Orange);
+            _ = hardware.RgbPwmLed.StartBlink(Color.Blue);
 
-            await SendDataToIoTHub(e.New);
+            await SendDataToStorageService(e.New);
 
             _ = hardware.RgbPwmLed.StartBlink(Color.Green);
         }
@@ -109,6 +106,8 @@ namespace Clima_OTA.Controllers
                 else
                 {
                     displayController.UpdateStatus("Offline...");
+
+                    _ = hardware.RgbPwmLed.StartBlink(Color.Red);
 
                     await Task.Delay(TimeSpan.FromSeconds(10));
                 }

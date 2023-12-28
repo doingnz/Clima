@@ -1,11 +1,14 @@
 ﻿using Amqp;
 using Amqp.Framing;
 using Clima_OTA.Model;
+using Clima_OTA.Services;
 using Meadow;
 using Meadow.Units;
 using System;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using ClimaServices.Model;
 
 namespace Clima_OTA.Controllers
 {
@@ -14,7 +17,7 @@ namespace Clima_OTA.Controllers
     /// Create a device within your IoT Hub
     /// And then generate a SAS token - this can be done via the Azure CLI 
     /// </summary>
-    public class IoTHubController
+    public class IoTHubController : IStorageService
     {
         private const string HubName = Secrets.HUB_NAME;
         private const string SasToken = Secrets.SAS_TOKEN;
@@ -25,7 +28,7 @@ namespace Clima_OTA.Controllers
         private Connection connection;
         private SenderLink sender;
 
-        private int messageId = 0;
+        //private int messageId = 0;
 
         public IoTHubController() { }
 
@@ -68,15 +71,34 @@ namespace Clima_OTA.Controllers
 
                 LogMemory("SendEnvironmentalReading");
 
+#if false
                 string messagePayload = $"" +
                         $"{{" +
+                        $"\"count\":{reading.Count}," +
+                        $"\"datetime\":{reading.DateTime}," +
+                        $"\"totalmemory\":{reading.TotalMemory}," +
                         $"\"temperature\":{reading.Temperature.Celsius}," +
                         $"\"humidity\":{reading.Humidity.Percent}," +
                         $"\"pressure\":{reading.Pressure.Millibar}," +
-                        $"\"memory\":{reading.Memory}," +
-                        $"\"battery\":{reading.BatteryVoltage.Volts}," +
-                        $"\"solar\":{reading.SolarVoltage.Volts}" +
+                        $"\"batteryvoltage\":{reading.BatteryVoltage.Volts}," +
+                        $"\"solarvoltage\":{reading.SolarVoltage.Volts}" +
                         $"}}";
+#else
+                ClimaRecordDto data = new ClimaRecordDto
+                {
+                    Count = reading.Count,
+                    DateTime = reading.DateTime,
+                    TotalMemory = reading.TotalMemory,
+                    Temperature = reading.Temperature.Celsius,
+                    Humidity = reading.Humidity.Percent,
+                    Pressure = reading.Pressure.Millibar,
+                    BatteryVoltage = reading.BatteryVoltage.Volts,
+                    SolarVoltage = reading.SolarVoltage.Volts
+                };
+#endif
+                string messagePayload = JsonSerializer.Serialize<ClimaRecordDto>(data);
+                
+                Resolver.Log.Info($"messagePayload: {messagePayload}");
 
                 Resolver.Log.Info("Create message");
                 var payloadBytes = Encoding.UTF8.GetBytes(messagePayload);

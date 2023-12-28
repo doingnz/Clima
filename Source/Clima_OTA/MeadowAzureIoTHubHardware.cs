@@ -6,9 +6,11 @@ using Meadow.Foundation.Sensors.Atmospheric;
 using Meadow.Units;
 using System.Security.Claims;
 using System;
+using System.Threading;
 using Meadow.Foundation;
 using Meadow.Peripherals.Sensors.Location.Gnss;
 using Clima_OTA.Model;
+using System.Threading.Tasks;
 
 namespace Clima_OTA
 {
@@ -16,26 +18,30 @@ namespace Clima_OTA
     {
         protected IClimaHardware Clima { get; private set; }
 
-        ClimaRecord Old;
-
+        private readonly object currentClimaRecordLock = new object();
+        ClimaRecord currentClimaRecord;
+        private int Counter { get; set; }
         public event EventHandler<Meadow.IChangeResult<ClimaRecord>> Updated = default!;
 
-        protected virtual void OnUpdated(ClimaRecord NewClimaRecord)
+        protected virtual void OnUpdated()
         {
-            NewClimaRecord.Memory = GC.GetTotalMemory(true);
-            
-            Counter++;
-            Resolver.Log.Trace($"Counter        : {Counter}");
-            Resolver.Log.Trace($"Time           : {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
-            Resolver.Log.Trace($"GetTotalMemory : {NewClimaRecord.Memory}");
-
-            Meadow.IChangeResult<ClimaRecord> e = new Meadow.ChangeResult<ClimaRecord>(NewClimaRecord, Old);
-            EventHandler<Meadow.IChangeResult<ClimaRecord>> handler = Updated;
-            if (handler != null)
+            lock (currentClimaRecordLock)
             {
-                handler(this, e);
+                currentClimaRecord.TotalMemory = GC.GetTotalMemory(true);
+                currentClimaRecord.DateTime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz");
+                currentClimaRecord.Count=Counter++;
+
+                Resolver.Log.Trace($"Counter        : {currentClimaRecord.Count}");
+                Resolver.Log.Trace($"Time           : {currentClimaRecord.DateTime}");
+                Resolver.Log.Trace($"GetTotalMemory : {currentClimaRecord.TotalMemory}");
+
+                Meadow.IChangeResult<ClimaRecord> e = new Meadow.ChangeResult<ClimaRecord>(currentClimaRecord, currentClimaRecord);
+                EventHandler<Meadow.IChangeResult<ClimaRecord>> handler = Updated;
+                if (handler != null)
+                {
+                    handler(this, e);
+                }
             }
-            Old = NewClimaRecord;
         }
 
         public RgbPwmLed RgbPwmLed { get; set; }
@@ -101,8 +107,19 @@ namespace Clima_OTA
             //Display = ProjLab.Display;
 
             RgbPwmLed = Clima.ColorLed;
-        }
 
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(15000);
+                    lock (currentClimaRecordLock)
+                    {
+                        OnUpdated();
+                    }
+                }
+            });
+        }
 
         public void StartUpdatingWeather()
         {
@@ -160,33 +177,31 @@ namespace Clima_OTA
 
         private void Bme688Updated(object sender, IChangeResult<(Temperature? Temperature, RelativeHumidity? Humidity, Pressure? Pressure, Resistance? GasResistance)> e)
         {
-            Resolver.Log.Info($"BME688         : {(int)e.New.Temperature?.Celsius:0.0}C, {(int)e.New.Humidity?.Percent:0.#}%, {(int)e.New.Pressure?.Millibar:0.#}mbar");
-
-            ClimaRecord New = new ClimaRecord(Old);
-            New.Temperature = (Temperature)e.New.Temperature;
-            New.Humidity = (RelativeHumidity)e.New.Humidity;
-            New.Pressure = (Pressure)e.New.Pressure;
-            OnUpdated(New);
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"BME688         : {(int)e.New.Temperature?.Celsius:0.0}C, {(int)e.New.Humidity?.Percent:0.#}%, {(int)e.New.Pressure?.Millibar:0.#}mbar");
+                currentClimaRecord.Temperature = (Temperature)e.New.Temperature;
+                currentClimaRecord.Humidity = (RelativeHumidity)e.New.Humidity;
+                currentClimaRecord.Pressure = (Pressure)e.New.Pressure;
+            }
         }
-
-        public int Counter { get; set; }
 
         private void SolarVoltageUpdated(object sender, IChangeResult<Voltage> e)
         {
-            Resolver.Log.Info($"Solar Voltage  : {e.New.Volts:0.#} volts");
-            ClimaRecord New = new ClimaRecord(Old);
-            New = new ClimaRecord(Old);
-            New.SolarVoltage = e.New;
-            OnUpdated(New);
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"Solar Voltage  : {e.New.Volts:0.#} volts");
+                currentClimaRecord.SolarVoltage = e.New;
+            }
         }
 
         private void BatteryVoltageUpdated(object sender, IChangeResult<Voltage> e)
         {
-            Resolver.Log.Info($"Battery Voltage: {e.New.Volts:0.#} volts");
-            ClimaRecord New = new ClimaRecord(Old);
-            New = new ClimaRecord(Old);
-            New.BatteryVoltage = e.New;
-            OnUpdated(New);
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"Battery Voltage: {e.New.Volts:0.#} volts");
+                currentClimaRecord.BatteryVoltage = e.New;
+            }
         }
 
         private void AnemometerUpdated(object sender, IChangeResult<Speed> e)
