@@ -9,8 +9,8 @@ using System;
 using System.Threading;
 using Meadow.Foundation;
 using Meadow.Peripherals.Sensors.Location.Gnss;
-using Clima_OTA.Model;
 using System.Threading.Tasks;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA
 {

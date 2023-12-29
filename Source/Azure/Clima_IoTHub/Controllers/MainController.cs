@@ -1,5 +1,4 @@
-﻿using Clima_OTA.Model;
-using Clima_OTA.Services;
+﻿using Clima_OTA.Services;
 using Meadow;
 using Meadow.Foundation;
 using Meadow.Hardware;
@@ -8,6 +7,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA.Controllers
 {

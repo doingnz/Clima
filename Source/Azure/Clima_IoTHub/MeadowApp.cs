@@ -6,7 +6,10 @@ using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Update;
 using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA
 {
@@ -20,12 +23,20 @@ namespace Clima_OTA
         private IWiFiNetworkAdapter wifi = null;
         private NtpClient ntpClient;
 
+        AppSettings appSettings = null;
+
         readonly string line = new string('-', 50);
 
         public override async Task Initialize()
         {
             Resolver.Log.Trace(line);
             Resolver.Log.Info("Initialize MeadowApp ...");
+
+            // clear settings
+            var appSettingsController = new AppSettingsController(MeadowOS.FileSystem.DataDirectory, "settings.json");
+            appSettings = appSettingsController.Read();
+            appSettings.TestRunId++;
+            appSettingsController.Save();
 
             var hardware = new MeadowAzureIoTHubHardware();
 
@@ -40,7 +51,7 @@ namespace Clima_OTA
             Resolver.Log.Info("Start Wifi Connection to get Connected Event!");
             await wifi.Connect("ASUS_10_2G", "Lunatic16042021!", TimeSpan.FromSeconds(45));
 
-            IStorageService storageService = new IoTHubController();
+            IStorageService storageService = new IoTHubController(appSettings.TestRunId);
 
             mainController = new MainController(hardware, wifi, storageService);
 

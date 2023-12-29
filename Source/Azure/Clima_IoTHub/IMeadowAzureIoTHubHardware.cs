@@ -1,8 +1,8 @@
-﻿using Clima_OTA.Model;
-using Meadow.Foundation.Graphics;
+﻿using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Leds;
 using Meadow.Foundation.Sensors.Atmospheric;
 using System;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA
 {

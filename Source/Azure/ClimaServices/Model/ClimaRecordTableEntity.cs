@@ -11,8 +11,11 @@ namespace ClimaServices.Model
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
 
-        //User Data
+        // Message meta data
         public string DeviceId { get; set; }
+
+        //User Data
+        public string TestRun { get; set; }
         public string DateTime { get; set; }
         public long Count { get; set; }
         public double Temperature { get; set; }

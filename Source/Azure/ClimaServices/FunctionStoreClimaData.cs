@@ -31,18 +31,18 @@ namespace ClimaServices
             {
                 _logger.LogInformation($"Event Data: {@event.Data}");
 
-                var success = @event.SystemProperties.TryGetValue("iothub-connection-device-id", out var deviceId);
+                var success = @event.SystemProperties.TryGetValue("iothub-connection-device-id", out var iotHubDeviceId);
+                string deviceId = iotHubDeviceId as string ?? string.Empty;
                 var deviceData = JsonSerializer.Deserialize<ClimaRecordDto>(@event.Data);
-                deviceData.DeviceId = deviceId as string ?? string.Empty;
 
                 await tableClient.CreateIfNotExistsAsync();
 
                 var tableEntity = new ClimaRecordTableEntity
                 {
                     DateTime = deviceData.DateTime,
-                    DeviceId = deviceData.DeviceId,
-                    PartitionKey = deviceData.DeviceId,
-                    RowKey = $"{deviceData.DeviceId}{@event.EnqueuedTime.UtcTicks}",
+                    DeviceId = deviceId,
+                    PartitionKey = $"{deviceData.TestRun}",//$"{deviceId}-{deviceData.TestRun}",
+                    RowKey = $"{deviceId}-{@event.EnqueuedTime.UtcTicks}",
                     
                     Temperature = deviceData.Temperature,
                     TotalMemory = deviceData.TotalMemory,

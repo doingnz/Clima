@@ -3,7 +3,7 @@ using Meadow;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Clima_OTA.Model;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA.Controllers
 {

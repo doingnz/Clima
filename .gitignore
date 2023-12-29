@@ -359,3 +359,4 @@ Source/Clima/WildernessLabs.Clima.App/WildernessLabs.Clima.App.Android/Resources
 Source/Clima/WildernessLabs.Clima.Client/WildernessLabs.Clima.Client.Android/Resources/Resource.designer.cs
 Source/Clima/MobileApp/MobileApp.Android/Resources/Resource.designer.cs
 Source/Clima_OTA/wifi.config.yaml
+Source/Azure/Clima_IoTHub/wifi.config.yaml

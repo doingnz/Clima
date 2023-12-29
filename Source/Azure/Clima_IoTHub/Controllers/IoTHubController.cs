@@ -1,6 +1,5 @@
 ﻿using Amqp;
 using Amqp.Framing;
-using Clima_OTA.Model;
 using Clima_OTA.Services;
 using Meadow;
 using Meadow.Units;
@@ -8,7 +7,7 @@ using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ClimaServices.Model;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA.Controllers
 {
@@ -28,9 +27,13 @@ namespace Clima_OTA.Controllers
         private Connection connection;
         private SenderLink sender;
 
+        private int testRunId = 0;
         //private int messageId = 0;
 
-        public IoTHubController() { }
+        public IoTHubController(int testRunId)
+        {
+            this.testRunId = testRunId;
+        }
 
         public async Task<bool> Initialize()
         {
@@ -86,6 +89,7 @@ namespace Clima_OTA.Controllers
 #else
                 ClimaRecordDto data = new ClimaRecordDto
                 {
+                    TestRun = $"{testRunId}",
                     Count = reading.Count,
                     DateTime = reading.DateTime,
                     TotalMemory = reading.TotalMemory,
@@ -98,7 +102,7 @@ namespace Clima_OTA.Controllers
 #endif
                 string messagePayload = JsonSerializer.Serialize<ClimaRecordDto>(data);
                 
-                Resolver.Log.Info($"messagePayload: {messagePayload}");
+                //Resolver.Log.Info($"messagePayload: {messagePayload}");
 
                 Resolver.Log.Info("Create message");
                 var payloadBytes = Encoding.UTF8.GetBytes(messagePayload);

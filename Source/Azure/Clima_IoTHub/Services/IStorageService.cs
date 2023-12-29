@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Clima_OTA.Model;
+using Clima_IoTHub.Model;
 
 
 namespace Clima_OTA.Services

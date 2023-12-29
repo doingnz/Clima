@@ -1,9 +1,6 @@
 ﻿using Meadow.Units;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Clima_OTA.Model
+namespace Clima_IoTHub.Model
 {
     public struct ClimaRecord
     {

@@ -1,5 +1,4 @@
-﻿using Clima_OTA.Model;
-using Meadow;
+﻿using Meadow;
 using Meadow.Devices;
 using Meadow.Foundation;
 using Meadow.Foundation.Leds;
@@ -10,6 +9,7 @@ using Meadow.Foundation.Sensors.Weather;
 using Meadow.Hardware;
 using System;
 using System.Text;
+using Clima_IoTHub.Model;
 
 namespace Clima_OTA.Controllers
 {
