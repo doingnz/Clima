@@ -206,36 +206,69 @@ namespace Clima_OTA
 
         private void AnemometerUpdated(object sender, IChangeResult<Speed> e)
         {
-            Resolver.Log.Info($"Anemometer     : {e.New.MetersPerSecond:0.#} m/s");
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"Anemometer     : {e.New.MetersPerSecond:0.#} m/s");
+                currentClimaRecord.WindMetersPerSecond = e.New.MetersPerSecond;
+            }
         }
 
         private void RainGuageUpdated(object sender, IChangeResult<Length> e)
         {
-            Resolver.Log.Info($"Rain Gauge     : {e.New.Millimeters:0.#} mm");
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"Rain Gauge     : {e.New.Millimeters:0.#} mm");
+                currentClimaRecord.RainMillimeters = e.New.Millimeters;
+            }
         }
 
         private void WindvaneUpdated(object sender, IChangeResult<Azimuth> e)
         {
-            Resolver.Log.Info($"Wind Vane      : {e.New.Compass16PointCardinalName} ({e.New.Radians:0.#} radians)");
+            lock (currentClimaRecordLock)
+            {
+                Resolver.Log.Info($"Wind Vane      : {e.New.Compass16PointCardinalName} ({e.New.Radians:0.#} radians)");
+                currentClimaRecord.WindCompassCardinalName = e.New.Compass16PointCardinalName;
+                currentClimaRecord.WindCompassDecimalDegrees = e.New.DecimalDegrees;
+            }
         }
 
         private void Scd40Updated(object sender, IChangeResult<(Concentration? Concentration, Temperature? Temperature, RelativeHumidity? Humidity)> e)
         {
-            Resolver.Log.Info($"SCD40          : {e.New.Concentration.Value.PartsPerMillion:0.#}ppm, {e.New.Temperature.Value.Celsius:0.0}C, {e.New.Humidity.Value.Percent:0.0}%");
+            if (e.New.Concentration != null && e.New.Temperature != null && e.New.Humidity != null)
+            {
+                lock (currentClimaRecordLock)
+                {
+                    Resolver.Log.Info($"SCD40          : {e.New.Concentration.Value.PartsPerMillion:0.#}ppm, {e.New.Temperature.Value.Celsius:0.0}C, {e.New.Humidity.Value.Percent:0.0}%");
+                    currentClimaRecord.SCD40PartsPerMillion = e.New.Concentration.Value.PartsPerMillion;
+                    currentClimaRecord.SCD40Temperature = e.New.Temperature.Value.Celsius;
+                    currentClimaRecord.SCD40Humidity = e.New.Humidity.Value.Percent;
+                }
+            }
         }
+
         private void GnssRmcReceived(object sender, GnssPositionInfo e)
         {
-            if (e.Valid)
+            if (e.Valid && e.Position != null)
             {
-                Resolver.Log.Info($"GNSS Position: lat: [{e.Position.Latitude}], long: [{e.Position.Longitude}]");
+                lock (currentClimaRecordLock)
+                {
+                    Resolver.Log.Info($"GNSS Position: lat: [{e.Position.Latitude}], long: [{e.Position.Longitude}]");
+                    currentClimaRecord.Latitude = e.Position.Latitude;
+                    currentClimaRecord.Longitude = e.Position.Longitude;
+                }
             }
         }
 
         private void GnssGllReceived(object sender, GnssPositionInfo e)
         {
-            if (e.Valid)
+            if (e.Valid && e.Position != null)
             {
-                Resolver.Log.Info($"GNSS Position: lat: [{e.Position.Latitude}], long: [{e.Position.Longitude}]");
+                lock (currentClimaRecordLock)
+                {
+                    Resolver.Log.Info($"GNSS Position: lat: [{e.Position.Latitude}], long: [{e.Position.Longitude}]");
+                    currentClimaRecord.Latitude = e.Position.Latitude;
+                    currentClimaRecord.Longitude = e.Position.Longitude;
+                }
             }
         }
 
