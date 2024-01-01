@@ -1,13 +1,24 @@
 ﻿using Meadow;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using YamlDotNet.Core;
 
 namespace Clima_IoTHub.Model
 {
     public class AppSettings
     {
         public int TestRunId { get; set; } = 0;
+    }
+    /// <summary>
+    /// Class to force compiler to generate Json Serialisation code
+    /// </summary>
+    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+    [JsonSerializable(typeof(AppSettings))]
+    internal partial class MyJsonContext : JsonSerializerContext
+    {
     }
 
     public class AppSettingsController
@@ -35,9 +46,7 @@ namespace Clima_IoTHub.Model
                 }
 
                 string jsonText = File.ReadAllText(settingsFile);
-                Resolver.Log.Info($"JsonText='{jsonText}'");
-                var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-                AppSettings = JsonSerializer.Deserialize<AppSettings>(jsonText, options);
+                AppSettings = JsonSerializer.Deserialize(jsonText, MyJsonContext.Default.AppSettings);
             }
             catch (Exception e)
             { 
@@ -53,7 +62,7 @@ namespace Clima_IoTHub.Model
 
             try
             {
-                string jsonText = JsonSerializer.Serialize<AppSettings>(AppSettings, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                string jsonText = JsonSerializer.Serialize(AppSettings, MyJsonContext.Default.AppSettings);
 
                 var result = Directory.Exists(settingsPath);
                 if (!result)
