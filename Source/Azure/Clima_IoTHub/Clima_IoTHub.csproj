@@ -8,6 +8,11 @@
 	<PropertyGroup>
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Include="meadow-34-00-25-00-03-51-38-34-35-31-38-33.crt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="Meadow.AmqpNetLite" Version="0.96.0" />
     <PackageReference Include="Meadow.Logging" Version="1.6.0" />
@@ -17,6 +22,9 @@
     <ProjectReference Include="..\..\Meadow.Clima\Meadow.Clima.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="meadow-34-00-25-00-03-51-38-34-35-31-38-33-all.crt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="meadow.config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
