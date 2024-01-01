@@ -4,6 +4,7 @@ using Meadow.Foundation;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,6 +66,8 @@ namespace Clima_OTA.Controllers
         {
             if (network.IsConnected && storageService.isAuthenticated)
             {
+                var st = new Stopwatch();
+                st.Start();
                 //displayController.UpdateSyncStatus(true);
                 displayController.UpdateStatus("Sending data...");
 
@@ -72,6 +75,9 @@ namespace Clima_OTA.Controllers
 
                 //displayController.UpdateSyncStatus(false);
                 displayController.UpdateStatus("Data sent!");
+                st.Stop();
+                Resolver.Log.Info($"SendDataToStorageService: {st.ElapsedMilliseconds} ms");
+
                 //Thread.Sleep(2000);
                 displayController.UpdateLastUpdated(DateTime.Now.AddHours(TIMEZONE_OFFSET).ToString("yyyy-MM-dd HH:mm:ss"));
 
