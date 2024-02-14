@@ -5,27 +5,57 @@ using System.Threading.Tasks;
 using Meadow.Hardware;
 using Meadow.Update;
 using Clima_Azure_Demo.MeadowCommands;
+using Meadow.Logging;
 
 namespace Clima_Azure_Demo
 {
     public class MeadowApp : App<F7CoreComputeV2>
     {
+        private IWiFiNetworkAdapter wifi = null;
+        private NtpClient ntpClient;
+        readonly string line = new string('-', 50);
+
         public override Task Initialize()
         {
             Resolver.Log.Info("Initialize...");
 
-            var wifi = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
-            wifi.NetworkConnected += (networkAdapter, networkConnectionEventArgs) =>
-            {
-                Resolver.Log.Info("Joined network");
-                Resolver.Log.Info($"IP Address: {networkAdapter.IpAddress}.");
-                Resolver.Log.Info($"Subnet mask: {networkAdapter.SubnetMask}");
-                Resolver.Log.Info($"Gateway: {networkAdapter.Gateway}");
-            };
+            ntpClient = Resolver.Services.Get<NtpClient>();
+            ntpClient.TimeChanged += NtpClient_TimeChanged;
+
+            wifi = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
+            wifi.NetworkConnected += Wifi_NetworkConnected;
+            wifi.NetworkDisconnected += Wifi_NetworkDisconnected;
+            wifi.NetworkError += Wifi_NetworkError;
+            wifi.SetAntenna(AntennaType.External, true);
 
             RebootMeadowCommand.Initialise();
 
             return Task.CompletedTask;
+        }
+
+        private void Wifi_NetworkError(INetworkAdapter sender, NetworkErrorEventArgs args)
+        {
+            Resolver.Log.Info($"Wifi_NetworkError:  ErrorCode={args.ErrorCode}.");
+        }
+
+        private void Wifi_NetworkDisconnected(INetworkAdapter sender)
+        {
+            Resolver.Log.Info($"Wifi_NetworkDisconnected!");
+        }
+
+        private void Wifi_NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
+        {
+            Resolver.Log.Trace(line);
+            Resolver.Log.Info($"IP Address is {wifi.IpAddress}");
+            Resolver.Log.Info("\n\nAdding UDP Logging ...");
+            Resolver.Log.AddProvider(new UdpLogger());
+        }
+
+        private void NtpClient_TimeChanged(DateTime utcTime)
+        {
+            Resolver.Log.Trace(line);
+            Resolver.Log.Info($"TimeChanged (UTC): {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
+            Resolver.Log.Trace(line);
         }
 
         public override Task Run()
