@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Meadow;
 using Meadow.Devices;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Meadow.Hardware;
 using Meadow.Update;
 using Clima_Azure_Demo.MeadowCommands;
 using Meadow.Logging;
+using Stateless;
 
 namespace Clima_Azure_Demo
 {
@@ -15,9 +17,23 @@ namespace Clima_Azure_Demo
         private NtpClient ntpClient;
         readonly string line = new string('-', 50);
 
+        private ClimaWeather climaWeather;
+
+        public MeadowApp()
+        {
+            climaWeather = new ClimaWeather("Clima");
+        }
+
         public override Task Initialize()
         {
             Resolver.Log.Info("Initialize...");
+
+            // Instantiate a new state machine in the Open state
+            climaWeather.Assign("Joe");
+            climaWeather.Defer();
+            climaWeather.Assign("Harry");
+            climaWeather.Assign("Fred");
+            climaWeather.Close();
 
             ntpClient = Resolver.Services.Get<NtpClient>();
             ntpClient.TimeChanged += NtpClient_TimeChanged;
@@ -26,9 +42,19 @@ namespace Clima_Azure_Demo
             wifi.NetworkConnected += Wifi_NetworkConnected;
             wifi.NetworkDisconnected += Wifi_NetworkDisconnected;
             wifi.NetworkError += Wifi_NetworkError;
+
             wifi.SetAntenna(AntennaType.External, true);
+            if (wifi.IsConnected)
+            {
+                Wifi_NetworkConnected(wifi, new NetworkConnectionEventArgs(wifi.IpAddress, wifi.SubnetMask, wifi.Gateway));
+            }
 
             RebootMeadowCommand.Initialise();
+            PingMeadowCommand.Initialise();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Resolver.Log.Info($"Initialize Done: {GC.GetTotalMemory(true)}");
 
             return Task.CompletedTask;
         }
@@ -38,9 +64,9 @@ namespace Clima_Azure_Demo
             Resolver.Log.Info($"Wifi_NetworkError:  ErrorCode={args.ErrorCode}.");
         }
 
-        private void Wifi_NetworkDisconnected(INetworkAdapter sender)
+        private void Wifi_NetworkDisconnected(INetworkAdapter sender, NetworkDisconnectionEventArgs args)
         {
-            Resolver.Log.Info($"Wifi_NetworkDisconnected!");
+            Resolver.Log.Info($"Wifi_NetworkError:  Reason={args.Reason}.");
         }
 
         private void Wifi_NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
@@ -92,6 +118,14 @@ namespace Clima_Azure_Demo
             };
 
             Resolver.Log.Info("Hello, Meadow Core-Compute!");
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(10000);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                Resolver.Log.Info($"Run GetTotalMemory= {GC.GetTotalMemory(true)}");
+            });
 
             return Task.CompletedTask;
         }
