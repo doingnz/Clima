@@ -121,12 +121,16 @@ namespace Clima_Azure_Demo
 
             Task.Run(async () =>
             {
-                await Task.Delay(10000);
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                Resolver.Log.Info($"Run GetTotalMemory= {GC.GetTotalMemory(true)}");
+                while (true)
+                {
+                    await Task.Delay(10000);
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    Resolver.Log.Info($"Run GetTotalMemory= {GC.GetTotalMemory(true)}");
+                }
             });
 
+            Resolver.Log.Info("Run Task.CompletedTask()");
             return Task.CompletedTask;
         }
     }
