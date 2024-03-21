@@ -30,7 +30,7 @@ Update:
 HealthMetrics:
 
     # Enable Health Metrics
-    Enabled: true
+    Enabled: false
 
     # How often to send metrics to Meadow.Cloud (in minutes)
     Interval: 15
