@@ -8,6 +8,7 @@ using Meadow.Update;
 using Clima_Azure_Demo.MeadowCommands;
 using Meadow.Logging;
 using Stateless;
+using System.IO;
 
 namespace Clima_Azure_Demo
 {
@@ -27,6 +28,8 @@ namespace Clima_Azure_Demo
         public override Task Initialize()
         {
             Resolver.Log.Info("Initialize...");
+
+  //          DriveInfo[] allDrives = DriveInfo.GetDrives();AbandonedMutexException 
 
             // Instantiate a new state machine in the Open state
             climaWeather.Assign("Joe");
@@ -61,20 +64,25 @@ namespace Clima_Azure_Demo
 
         private void Wifi_NetworkError(INetworkAdapter sender, NetworkErrorEventArgs args)
         {
+            Resolver.Log.Trace(line);
             Resolver.Log.Info($"Wifi_NetworkError:  ErrorCode={args.ErrorCode}.");
+            Resolver.Log.Trace(line);
         }
 
         private void Wifi_NetworkDisconnected(INetworkAdapter sender, NetworkDisconnectionEventArgs args)
         {
-            Resolver.Log.Info($"Wifi_NetworkError:  Reason={args.Reason}.");
+            Resolver.Log.Trace(line);
+            Resolver.Log.Info($"Wifi_NetworkDisconnected:  Reason={args.Reason}.");
+            Resolver.Log.Trace(line);
         }
 
         private void Wifi_NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
             Resolver.Log.Trace(line);
             Resolver.Log.Info($"IP Address is {wifi.IpAddress}");
-            Resolver.Log.Info("\n\nAdding UDP Logging ...");
-            Resolver.Log.AddProvider(new UdpLogger());
+            //Resolver.Log.Info("\n\nAdding UDP Logging ...");
+            //Resolver.Log.AddProvider(new UdpLogger());
+            Resolver.Log.Trace(line);
         }
 
         private void NtpClient_TimeChanged(DateTime utcTime)
@@ -84,46 +92,52 @@ namespace Clima_Azure_Demo
             Resolver.Log.Trace(line);
         }
 
-        public override Task Run()
+        public override async Task Run()
         {
             Resolver.Log.Info("Run...");
 
             Resolver.Log.Info("Initialise Update Service.");
 
-            var svc = Resolver.Services.Get<IUpdateService>() as Meadow.Update.UpdateService;
-            // Uncomment to clear any persisted update info. This allows installing the same update multiple times, such as you might do during development.
-            // svc.ClearUpdates();
+            //var svc = Resolver.Services.Get<IUpdateService>() as Meadow.Update.UpdateService;
+            //// Uncomment to clear any persisted update info. This allows installing the same update multiple times, such as you might do during development.
+            //while (svc.State != UpdateState.Dead && svc.State != UpdateState.Connected)
+            //{
+            //    Resolver.Log.Trace($"svc.State = {svc.State}");
+            //    await Task.Delay(1000);
+            //}
+            //svc.ClearUpdates();
 
-            svc.OnUpdateAvailable += (updateService, info) =>
-            {
-                Resolver.Log.Info("Update available!");
+            //svc.OnUpdateAvailable += (updateService, info) =>
+            //{
+            //    Resolver.Log.Info("Update available!");
 
-                // Queue update for retrieval "later"
-                Task.Run(async () =>
-                {
-                    await Task.Delay(5000);
-                    updateService.RetrieveUpdate(info);
-                });
-            };
+            //    // Queue update for retrieval "later"
+            //    Task.Run(async () =>
+            //    {
+            //        await Task.Delay(5000);
+            //        updateService.RetrieveUpdate(info);
+            //    });
+            //};
 
-            svc.OnUpdateRetrieved += (updateService, info) =>
-            {
-                Resolver.Log.Info("Update retrieved!");
+            //svc.OnUpdateRetrieved += (updateService, info) =>
+            //{
+            //    Resolver.Log.Info("Update retrieved!");
 
-                Task.Run(async () =>
-                {
-                    await Task.Delay(5000);
-                    updateService.ApplyUpdate(info);
-                });
-            };
+            //    Task.Run(async () =>
+            //    {
+            //        await Task.Delay(5000);
+            //        updateService.ApplyUpdate(info);
+            //    });
+            //};
 
             Resolver.Log.Info("Hello, Meadow Core-Compute!");
 
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 while (true)
                 {
                     await Task.Delay(10000);
+                    Resolver.Log.Info($"Time (UTC): {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz")}");
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                     Resolver.Log.Info($"Run GetTotalMemory= {GC.GetTotalMemory(true)}");
@@ -131,7 +145,7 @@ namespace Clima_Azure_Demo
             });
 
             Resolver.Log.Info("Run Task.CompletedTask()");
-            return Task.CompletedTask;
+            return;// Task.CompletedTask;
         }
     }
 }
