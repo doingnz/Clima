@@ -24,7 +24,18 @@ namespace Clima_Azure_Demo
         {
             climaWeather = new ClimaWeather("Clima");
         }
+        public override Task OnShutdown()
+        {
+            Resolver.Log.Info($"OnShutdown called");
 
+            return base.OnShutdown();
+        }
+
+        public override Task OnError(Exception e)
+        {
+            Resolver.Log.Info($"OnError called with {e.Message}");
+            return base.OnError(e);
+        }
         public override Task Initialize()
         {
             Resolver.Log.Info("Initialize...");
@@ -141,6 +152,7 @@ namespace Clima_Azure_Demo
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                     Resolver.Log.Info($"Run GetTotalMemory= {GC.GetTotalMemory(true)}");
+                    Resolver.Log.Info($"IP Address is currently {wifi.IpAddress} & IsConnected={wifi.IsConnected}");
                 }
             });
 
