@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Meadow.Devices.Clima.Controllers;
 
+/// <summary>
+/// Controller for managing sensor data from various sensors in the Clima hardware.
+/// </summary>
 public class SensorController
 {
     private IClimaHardware hardware;
@@ -13,9 +16,20 @@ public class SensorController
     private Length? startupRainValue;
     private SensorData latestData;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to log sensor data.
+    /// </summary>
     private bool LogSensorData { get; set; } = false;
+
+    /// <summary>
+    /// Gets the interval at which sensor data is updated.
+    /// </summary>
     public TimeSpan UpdateInterval { get; } = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SensorController"/> class.
+    /// </summary>
+    /// <param name="clima">The Clima hardware interface.</param>
     public SensorController(IClimaHardware clima)
     {
         latestData = new SensorData();
@@ -58,11 +72,6 @@ public class SensorController
         if (clima.RainGauge is { } rainGuage)
         {
             rainGuage.Updated += RainGaugeUpdated;
-
-            // TODO: if we're restarting, we need to rehydrate today's totals already collected
-            //            startupRainValue = rainGuage.Read().Result;
-            //            Resolver.Log.Info($"Startup rain value: {startupRainValue}");
-
             // rain does not change frequently
             rainGuage.StartUpdating(TimeSpan.FromMinutes(5));
         }
@@ -80,6 +89,10 @@ public class SensorController
         }
     }
 
+    /// <summary>
+    /// Gets the latest sensor data.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the latest sensor data.</returns>
     public Task<SensorData> GetSensorData()
     {
         lock (latestData)
