@@ -14,7 +14,6 @@ namespace Meadow.Devices;
 /// </summary>
 public class MainController
 {
-    private IClimaHardware hardware;
     private NotificationController notificationController;
     private SensorController sensorController;
     private PowerController powerController;
@@ -39,8 +38,6 @@ public class MainController
     /// <param name="networkAdapter">The network adapter to use, or null if no network adapter is available.</param>
     public Task Initialize(IClimaHardware hardware, INetworkAdapter? networkAdapter)
     {
-        this.hardware = hardware;
-
         Resolver.Log.Info("Initialize hardware...");
 
         notificationController = new NotificationController(hardware.RgbLed);
