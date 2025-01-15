@@ -76,6 +76,7 @@ public class MainController
             }
             else
             {
+                Resolver.Log.Info("Network is connected.");
                 notificationController.SetSystemStatus(NotificationController.SystemStatus.NetworkConnected);
                 if (Resolver.MeadowCloudService.ConnectionState == CloudConnectionState.Connecting)
                 {
@@ -95,6 +96,8 @@ public class MainController
         }
 
         _ = SystemPreSleepStateProc();
+
+        Resolver.Log.Info($"Initialize hardware Task.CompletedTask");
 
         return Task.CompletedTask;
     }
@@ -125,7 +128,9 @@ public class MainController
         if (networkController != null)
         {
             notificationController.SetSystemStatus(SystemStatus.SearchingForNetwork);
+            Resolver.Log.Info("SystemPreSleepStateProc -> ConnectToCloud()");
             var connected = await networkController.ConnectToCloud();
+            Resolver.Log.Info($"SystemPreSleepStateProc <- ConnectToCloud() connected={connected}");
             if (connected)
             {
                 if (cloudController != null)
@@ -143,6 +148,7 @@ public class MainController
         notificationController.SetSystemStatus(SystemStatus.LowPower);
         if (lowPowerMode)
         {
+            Resolver.Log.Info($"SystemPreSleepStateProc: powerController.TimedSleep({SensorReadPeriodSeconds}s)");
             powerController.TimedSleep(TimeSpan.FromSeconds(SensorReadPeriodSeconds));
         }
         else
@@ -158,7 +164,7 @@ public class MainController
 
         if (++tick % PublicationPeriodMinutes * 60 / SensorReadPeriodSeconds == 0)
         {
-            _ = SystemPreSleepStateProc();
+           _ = SystemPreSleepStateProc();
         }
         else
         {
