@@ -14,7 +14,7 @@ public class SensorController
     private SensorData latestData;
 
     private bool LogSensorData { get; set; } = false;
-    public TimeSpan UpdateInterval { get; } = TimeSpan.FromSeconds(5);
+    public TimeSpan UpdateInterval { get; } = TimeSpan.FromSeconds(10);
 
     public SensorController(IClimaHardware clima)
     {
@@ -25,7 +25,6 @@ public class SensorController
         {
             temperatureSensor.Updated += TemperatureUpdated;
             // atmospheric temp is slow to change
-            temperatureSensor.StartUpdating(TimeSpan.FromSeconds(15));
             temperatureSensor.StartUpdating(UpdateInterval);
         }
 
@@ -53,7 +52,7 @@ public class SensorController
         if (clima.WindVane is { } windVane)
         {
             windVane.Updated += WindvaneUpdated;
-            windVane.StartUpdating(TimeSpan.FromSeconds(1));
+            windVane.StartUpdating(UpdateInterval);
         }
 
         if (clima.RainGauge is { } rainGuage)
