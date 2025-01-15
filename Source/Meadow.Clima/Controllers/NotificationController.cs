@@ -61,7 +61,6 @@ public class NotificationController
         /// System is connected to the cloud.
         /// </summary>
         Connected,
-
     }
 
     private readonly IRgbPwmLed? rgbLed;
@@ -108,7 +107,6 @@ public class NotificationController
                 rgbLed?.StopAnimation();
                 rgbLed?.SetColor(RgbLedColors.Green);
                 break;
-
         }
     }
 

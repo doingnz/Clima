@@ -15,8 +15,7 @@ public class ClimaHardwareProvider : IMeadowAppEmbeddedHardwareProvider<IClimaHa
     /// Initializes a new instance of the ClimaHardwareProvider class.
     /// </summary>
     public ClimaHardwareProvider()
-    {
-    }
+    { }
 
     /// <summary>
     /// Creates an instance of the Clima hardware.
