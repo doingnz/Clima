@@ -277,11 +277,6 @@ public class MainController
         }
     }
 
-    public Task Run()
-    {
-        return Task.CompletedTask;
-    }
-
     /// <summary>
     /// Logs the application startup after a crash.
     /// </summary>

@@ -31,5 +31,6 @@
     <PackageReference Include="Meadow.Foundation.Sensors.Weather.SwitchingAnemometer" Version="2.0.0.3" />
     <PackageReference Include="Meadow.Foundation.Sensors.Weather.SwitchingRainGauge" Version="2.0.0.3" />
     <PackageReference Include="Meadow.Foundation.Sensors.Weather.WindVane" Version="2.0.0.3" />
+    <PackageReference Include="Meadow.Logging.LogProviders" Version="2.0.0.3" />
   </ItemGroup>
 </Project>
